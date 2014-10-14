@@ -1,0 +1,51 @@
+<script src="http://localhost:8888/socket.io/socket.io.js"></script>
+<script>
+
+var io = io.connect("http://localhost:8888", {force_connection: true});
+$(document).ready(function(){
+  $("#new_product").submit(function(){
+    $.post(
+      $(this).attr("action"),
+      $(this).serialize(),
+      function(data){
+        console.log(data);
+      },
+      "json"
+    );
+    return false
+  });
+  io.on("add_product", function(response){
+    console.log(response);
+    $("#body").append("<tr><td>"+response.name+"</td><td>" + response.description + "</td></tr>")
+  });
+});
+</script>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+
+  <tbody id="body">
+    <% @products.each do |product| %>
+    <tr>
+      <td><%= product.name %></td>
+      <td><%= product.description %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<h2>Add New Product</h2>
+<form id="new_product" action="/products" method="post">
+  <input name="authenticity_token" value="<%= form_authenticity_token %>" type="hidden">
+  <label>Name: 
+    <input type="text" name="product[name]" />
+  </label>
+  <label>Description:
+    <input type="text" name="product[description]" />
+  </label>
+  <input type="submit" value="Create new product" />
+</form>
